@@ -18,9 +18,5 @@ Download Web pages and Extract Links Made in Python
                                             
                                                                                                             
 
-# OUTPUT :
-
-  
-![image](https://user-images.githubusercontent.com/104047532/203329145-f2c71a90-9ba7-426e-a1a5-b8a6a2b38f5f.png)
 
 
