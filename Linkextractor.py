@@ -5,6 +5,8 @@ import argparse
 import os
 import pyinputplus as pyip
 import sys
+import time
+
 
 # Add StatusCodes Here
 STATUS_CODES = [200,404]
@@ -36,8 +38,8 @@ USAGE = """
 parser = argparse.ArgumentParser(USAGE)
 parser.add_argument('-u', '--url',  type=str,metavar="", required=True,
                     help='example = https://www.example.com')
-parser.add_argument('-o', '--out',metavar="", default="sample", type=str, required=True,
-                    help='example = output.txt')
+parser.add_argument('-o', '--out',required=False, action='store_true',
+                    help='Save web page to file : example.html')
 
 parser.add_argument('-p', '--print', required=False, action='store_true'
                     )
@@ -52,15 +54,10 @@ args = parser.parse_args()
 
 
 URL = args.url
-OUTPUT_FILE = args.out
-
-response = re.get(URL)
-soup = BeautifulSoup(response.content, 'html.parser')
-
-def defaultFileName(OUTPUT_FILE):
+def defaultFileName():
     remove_chars = ["", "http:", "https:"]
     final_url = ""
-    url = str(OUTPUT_FILE).split('/')
+    url = str(URL).split('/')
     for i in url:
         if i in remove_chars:
             url.remove(i)
@@ -70,10 +67,16 @@ def defaultFileName(OUTPUT_FILE):
 
     return final_url
 
+OUTPUT_FILE = defaultFileName()
+
+response = re.get(URL)
+soup = BeautifulSoup(response.content, 'html.parser')
+
+
 
 def writeTofile(content):
     if os.path.exists(OUTPUT_FILE):
-        promptMSG = f"File ({OUTPUT_FILE}) already exists \n would you like to overWrite? \n1)yes\n2)no\n"
+        promptMSG = f"File ({OUTPUT_FILE}) already exists \n would you like to overWrite? (ans 1 or 2)?\n 1 = yes\n 2 = no"
         option = pyip.inputChoice(
             prompt=promptMSG, choices=['1', '2'])
         print("\nSelected Option: " + option)
@@ -81,11 +84,13 @@ def writeTofile(content):
             print(f"File ({OUTPUT_FILE}) over Written!!")
             with open(OUTPUT_FILE, 'w')as f:
                 f.write(content)
+            print(OUTPUT_FILE, "Created successfully")
         else:
-            print("\nMSG: No Changes made to file")
+            print("\nMSG: No Changes made to file ",OUTPUT_FILE)
     else:
         with open(OUTPUT_FILE, 'w')as f:
             f.write(content)
+        print(OUTPUT_FILE, "Created successfully")
 
 
 def overWrite():
@@ -93,7 +98,7 @@ def overWrite():
     Overwrite a file Option
     Returns option
     """
-    promptMSG = f"\nWould you like to overwrite the existing File ?\n1)yes\n2)no ?   "
+    promptMSG = f"Would you like to overwrite the existing File (ans 1 or 2)?\n 1 = yes\n 2 = no "
     option = pyip.inputChoice(prompt=promptMSG, choices=['1', '2'])
     return option
 
@@ -107,20 +112,27 @@ def writeURLS(filename):
     with open(filename, 'w') as f:
         for i in URLS:
             url = f"{i}\n"
+            # print(url)
             f.write(url)
 
 
 def extract_urls(filename):
-    filename = f"EXTRACTED_URLS_{defaultFileName(OUTPUT_FILE)}.txt"
+    default_filename = f"EXTRACTED_URLS_{defaultFileName()}.txt"
+    # filename = pyip.inputFilename(prompt="FILE NAME FOR EXTRACTED Urls?",blank=True)
+    # if filename == "":
+    #     filename = default_filename
+    filename = default_filename
     if os.path.exists(filename):
-        print(f"{filename} Exists")
+        print(f"\n{filename} Exists")
         option = overWrite()
-        if option == "yes":
+        if option == "1":
+            print (filename,": Overwritten")
             writeURLS(filename)
         else: 
             print(f"No Changes made to {filename}")
     else:
         writeURLS(filename)
+        print(filename, "Created successfully")
 
         # Write To File
         # URL = "http://ptl-65dde18e-5c2240ac.libcurl.so/"
@@ -129,8 +141,11 @@ def myprog():
        
         if args.out:
             writeTofile(str(soup.prettify()))
+        
         if args.extract_urls:
             extract_urls(URL)
+
+    
         if args.print:
             print(soup.prettify())
 
@@ -140,4 +155,4 @@ def myprog():
 if __name__ == "__main__":
    myprog()
 
-# BY EXCEPTIONAL
+# BY 3XCEPTIONAL
